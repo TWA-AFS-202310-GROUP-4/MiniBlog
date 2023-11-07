@@ -17,5 +17,10 @@ namespace MiniBlog.Services
         {
             return await userRepository.GetByName(name);
         }
+
+        public async Task<User> Create(User user)
+        {
+            return await userRepository.Add(user);
+        }
     }
 }
