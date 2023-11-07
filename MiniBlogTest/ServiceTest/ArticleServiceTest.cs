@@ -10,14 +10,21 @@ namespace MiniBlogTest.ServiceTest;
 
 public class ArticleServiceTest
 {
+
+    private readonly Mock<IArticleRepository> articleMock;
+    private readonly Mock<IUserRepository> userMock;
+
+    public ArticleServiceTest()
+    {
+        articleMock = new Mock<IArticleRepository>();
+        userMock = new Mock<IUserRepository>();
+    }
+
     [Fact]
     public async void Should_create_article_when_invoke_CreateArticle_given_input_article()
     {
         // given
         Article newArticle = new Article("pocky", "name", "sss");
-        var userMock = new Mock<IUserRepository>();
-        var articleMock = new Mock<IArticleRepository>();
-
         articleMock.Setup(
             repository => repository
             .CreateArticle(It.IsAny<Article>()))
@@ -44,8 +51,6 @@ public class ArticleServiceTest
     {
         // given
         Article newArticle = new Article("pocky", "name", "sss");
-        var userMock = new Mock<IUserRepository>();
-        var articleMock = new Mock<IArticleRepository>();
         var articleService = new ArticleService(articleMock.Object, userMock.Object);
         articleMock.Setup(
             repository => repository.
