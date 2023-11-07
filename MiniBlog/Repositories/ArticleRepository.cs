@@ -29,7 +29,8 @@ namespace MiniBlog.Repositories
 
         public async Task<Article?> GetArticleById(string id)
         {
-            return await articleCollection.Find(article => article.Id == id).FirstOrDefaultAsync();
+            var article = await articleCollection.Find(article => article.Id == id).FirstOrDefaultAsync();
+            return article == null ? null : article;
         }
     }
 }
