@@ -10,32 +10,18 @@ namespace MiniBlog.Services;
 
 public class ArticleService
 {
-    private readonly ArticleStore articleStore = null!;
-    private readonly UserStore userStore = null!;
     private readonly IArticleRepository articleRepository = null!;
     private readonly IUserRepository userRepository = null!;
    
-    public ArticleService(ArticleStore articleStore, UserStore userStore, IArticleRepository articleRepository, IUserRepository userRepository, IArticleRepository articleRepo)
+    public ArticleService( IArticleRepository articleRepository, IUserRepository userRepository, IArticleRepository articleRepo)
     {
-        this.articleStore = articleStore;
-        this.userStore = userStore;
+
         this.articleRepository = articleRepository;
         this.userRepository = userRepository;
     }
 
     public async Task<Article?> CreateArticle(Article article)
     {
-        // if (article.UserName != null)
-        // {
-        //     if (!userStore.Users.Exists(_ => article.UserName == _.Name))
-        //     {
-        //         userStore.Users.Add(new User(article.UserName));
-        //     }
-
-        //     articleStore.Articles.Add(article);
-        // }
-
-        // return articleStore.Articles.Find(articleExisted => articleExisted.Title == article.Title);
 
         if (article.UserName != null)
         {
@@ -54,8 +40,8 @@ public class ArticleService
         return await articleRepository.GetArticles();
     }
 
-    public Article? GetById(Guid id)
+    public async Task<Article> GetById(string id)
     {
-        return articleStore.Articles.FirstOrDefault(article => article.Id == id.ToString());
+        return await articleRepository.GetArticleByID(id);
     }
 }
