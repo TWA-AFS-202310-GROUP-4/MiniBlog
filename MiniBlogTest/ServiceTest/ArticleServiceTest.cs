@@ -1,29 +1,49 @@
 using MiniBlog.Model;
 using MiniBlog.Services;
 using MiniBlog.Stores;
+using MiniBlog.Repositories;
+using Moq;
 using Xunit;
+using System;
+using System.Threading.Tasks;
+using System.Threading;
+using System.Collections.Generic;
 
 namespace MiniBlogTest.ServiceTest;
 
 public class ArticleServiceTest
 {
-    // [Fact]
-    // public void Should_create_article_when_invoke_CreateArticle_given_input_article()
-    // {
-    //     // given
-    //     var newArticle = new Article("Jerry", "Let's code", "c#");
-    //     var articleStore = new ArticleStore();
-    //     var articleCountBeforeAddNewOne = articleStore.Articles.Count;
-    //     var userStore = new UserStore();
-    //     var articleService = new ArticleService(articleStore, userStore);
+    [Fact]
+    public async Task Should_create_article_when_author_does_not_exist_given_a_not_added_user_with_article()
+    {
+        //Given
+        var mockArticleRepository = new Mock<IArticleRepository>();
+        var mockUserRepository = new Mock<IUserRepository>();
+        var articleService = new ArticleService(mockArticleRepository.Object, mockUserRepository.Object);
+        var article = new Article() { UserName = "Jack", Title = "Test", Content = "test test" };
+        User user = new User(article.UserName);
 
-    //     // when
-    //     var addedArticle = articleService.CreateArticle(newArticle);
+        //When
+        await articleService.CreateArticle(article);
 
-    //     // then
-    //     Assert.Equal(articleCountBeforeAddNewOne + 1, articleStore.Articles.Count);
-    //     Assert.Equal(newArticle.Title, addedArticle.Title);
-    //     Assert.Equal(newArticle.Content, addedArticle.Content);
-    //     Assert.Equal(newArticle.UserName, addedArticle.UserName);
-    // }
+        //Then
+        mockArticleRepository.Verify(method => method.CreateArticle(article), Times.Once());
+        mockUserRepository.Verify(method => method.AddUser(It.IsAny<User>()), Times.Once());
+    }
+
+    [Fact]
+    public async Task Should_add_article_only_when_author_exist_given_an_article()
+    {
+        //Given
+        var mockArticleRepository = new Mock<IArticleRepository>();
+        var mockUserRepository = new Mock<IUserRepository>();
+        var articleService = new ArticleService(mockArticleRepository.Object, mockUserRepository.Object);
+        mockUserRepository.Setup(repository => repository.FindUserByName("Jack")).Returns(Task.FromResult(new User("Jack")));
+        var article = new Article() { UserName = "Jack", Title = "Test", Content = "test test" };
+
+        //When
+        await articleService.CreateArticle(article);
+        mockArticleRepository.Verify(method => method.CreateArticle(article), Times.Once());
+        mockUserRepository.Verify(method => method.AddUser(It.IsAny<User>()), Times.Never());
+    }
 }
