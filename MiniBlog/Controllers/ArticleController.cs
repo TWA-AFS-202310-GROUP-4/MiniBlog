@@ -36,7 +36,7 @@ namespace MiniBlog.Controllers
         }
 
         [HttpGet("{id}")]
-        public Article? GetById(Guid id)
+        public Article? GetById(string id)
         {
             return articleService.GetById(id);
         }

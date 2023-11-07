@@ -33,9 +33,10 @@ public class ArticleService
         //     articleStore.Articles.Add(article);
         // }
 
-        // return articleStore.Articles.Find(articleExisted => articleExisted.Title == article.Title);
-
-        return await this.articleRepository.CreateArticle(article);
+        // return articleStore.Articles.Find(articleExisted => articleExisted.Title == article.Title)
+        //var insertedArticle = new Article(article.UserName, article.Title, article.Content);
+        article.Id = string.Empty;
+        return await articleRepository.CreateArticle(article);
     }
 
     public async Task<List<Article>> GetAll()
@@ -43,7 +44,7 @@ public class ArticleService
         return await articleRepository.GetArticles();
     }
 
-    public Article? GetById(Guid id)
+    public Article? GetById(string id)
     {
         return articleStore.Articles.FirstOrDefault(article => article.Id == id.ToString());
     }
