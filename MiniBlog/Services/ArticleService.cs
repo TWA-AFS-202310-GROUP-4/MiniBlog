@@ -8,17 +8,15 @@ using MiniBlog.Stores;
 
 namespace MiniBlog.Services;
 
-public class ArticleService
+public class ArticleService : IArticleService
 {
-    private readonly ArticleStore articleStore = null!;
-    private readonly UserStore userStore = null!;
     private readonly IArticleRepository articleRepository = null!;
+    private readonly IUserRepository userRepository = null!;
 
-    public ArticleService(ArticleStore articleStore, UserStore userStore, IArticleRepository articleRepository)
+    public ArticleService(IArticleRepository articleRepository, IUserRepository userRepository)
     {
-        this.articleStore = articleStore;
-        this.userStore = userStore;
         this.articleRepository = articleRepository;
+        this.userRepository = userRepository;
     }
 
     public async Task<Article?> CreateArticle(Article article)
@@ -35,7 +33,19 @@ public class ArticleService
 
         // return articleStore.Articles.Find(articleExisted => articleExisted.Title == article.Title);
 
-        return await this.articleRepository.CreateArticle(article);
+        if (article.UserName != null)
+        {
+            var articleUser = await userRepository.FindUserByName(article.UserName);
+
+            if (articleUser == null)
+            {
+                await userRepository.AddUser(new User(article.UserName));
+            }
+
+            await articleRepository.CreateArticle(article);
+        }
+
+        return await articleRepository.FindArticleByTitle(article.Title);
     }
 
     public async Task<List<Article>> GetAll()
@@ -43,8 +53,8 @@ public class ArticleService
         return await articleRepository.GetArticles();
     }
 
-    public Article? GetById(Guid id)
+    public async Task<Article> GetById(Guid id)
     {
-        return articleStore.Articles.FirstOrDefault(article => article.Id == id.ToString());
+        return await articleRepository.FindArticleById(id);
     }
 }

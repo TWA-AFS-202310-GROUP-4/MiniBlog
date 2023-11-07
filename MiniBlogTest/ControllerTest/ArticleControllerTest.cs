@@ -59,16 +59,24 @@ namespace MiniBlogTest.ControllerTest
         [Fact]
         public async void Should_create_article_and_register_user_correct()
         {
-            var client = GetClient(new ArticleStore(new List<Article>
-            {
-                new Article(null, "Happy new year", "Happy 2021 new year"),
-                new Article(null, "Happy Halloween", "Halloween is coming"),
-            }), new UserStore(new List<User>()));
+            var mockArticleRepository = new Mock<IArticleRepository>();
+            var mockUserRepository = new Mock<IUserRepository>();
 
             string userNameWhoWillAdd = "Tom";
             string articleContent = "What a good day today!";
             string articleTitle = "Good day";
             Article article = new Article(userNameWhoWillAdd, articleTitle, articleContent);
+
+            mockArticleRepository.Setup(repository => repository.GetArticles()).Returns(Task.FromResult(new List<Article>
+            {
+                new Article(null, "Happy new year", "Happy 2021 new year"),
+                new Article(null, "Happy Halloween", "Halloween is coming"),
+                new Article("Tom", "Good day", "What a good day today!"),
+            }));
+
+            mockUserRepository.Setup(repository => repository.FindUserByName("Tom")).Returns(Task.FromResult(new User("Tom")));
+
+            var client = GetClient(new ArticleStore(), new UserStore(new List<User>() { new User("Tom") }), mockArticleRepository.Object, mockUserRepository.Object);
 
             var httpContent = JsonConvert.SerializeObject(article);
             StringContent content = new StringContent(httpContent, Encoding.UTF8, MediaTypeNames.Application.Json);
