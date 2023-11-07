@@ -1,10 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Net.Mime;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.TestHost;
 using MiniBlog;
 using MiniBlog.Model;
@@ -59,19 +61,43 @@ namespace MiniBlogTest.ControllerTest
         [Fact]
         public async void Should_create_article_and_register_user_correct()
         {
-            var client = GetClient(new ArticleStore(new List<Article>
-            {
-                new Article(null, "Happy new year", "Happy 2021 new year"),
-                new Article(null, "Happy Halloween", "Halloween is coming"),
-            }), new UserStore(new List<User>()));
-
             string userNameWhoWillAdd = "Tom";
             string articleContent = "What a good day today!";
             string articleTitle = "Good day";
             Article article = new Article(userNameWhoWillAdd, articleTitle, articleContent);
+            var mockArticleRepo = new Mock<IArticleRepository>();
+            mockArticleRepo.Setup(repository => repository.GetArticles()).
+                Returns(Task.FromResult(new List<Article>
+                {
+                    new Article(null, "Happy new year", "Happy 2021 new year"),
+                    new Article(null, "Happy Halloween", "Halloween is coming"),
+                    article,
+                }));
+
+            var userStore = new UserStore(new List<User>());
+
+            mockArticleRepo.Setup(repository => repository.CreateArticle(It.IsAny<Article>()))
+                .ReturnsAsync((Article article) =>
+                {
+                    article.Id = Guid.NewGuid().ToString();
+                    userStore.Users.Add(new User(article.UserName));
+                    return article;
+                });
+
+            var mockUserRepo = new Mock<IUserRepository>();
+            /*mockUserRepo.Setup(repository => repository.GetUserByName(It.IsAny<string>()))
+                              .ReturnsAsync(new User("Tom"));
+            mockUserRepo.Setup(repository => repository.GetUsers())
+                              .Returns(Task.FromResult(new List<User>
+                              {
+                                  new User("Tom"),
+                              }));*/
+
+            var client = GetClient(new ArticleStore(), userStore, mockArticleRepo.Object, mockUserRepo.Object);
 
             var httpContent = JsonConvert.SerializeObject(article);
             StringContent content = new StringContent(httpContent, Encoding.UTF8, MediaTypeNames.Application.Json);
+
             var createArticleResponse = await client.PostAsync("/article", content);
 
             // It fail, please help
@@ -80,6 +106,7 @@ namespace MiniBlogTest.ControllerTest
             var articleResponse = await client.GetAsync("/article");
             var body = await articleResponse.Content.ReadAsStringAsync();
             var articles = JsonConvert.DeserializeObject<List<Article>>(body);
+
             Assert.Equal(3, articles.Count);
             Assert.Equal(articleTitle, articles[2].Title);
             Assert.Equal(articleContent, articles[2].Content);
