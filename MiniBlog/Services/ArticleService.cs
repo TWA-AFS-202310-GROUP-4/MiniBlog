@@ -23,7 +23,7 @@ public class ArticleService
     {
         if (article.UserName != null)
         {
-            var result = userRepository.GetUserByName(article.UserName);
+            var result = await userRepository.GetUserByName(article.UserName);
             if (result == null)
             {
                 _ = userRepository.CreateUser(new User(article.UserName));
