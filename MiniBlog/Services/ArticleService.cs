@@ -13,9 +13,9 @@ public class ArticleService
     private readonly ArticleStore articleStore = null!;
     private readonly UserStore userStore = null!;
     private readonly IArticleRepository articleRepository = null!;
-    private readonly UserRepository userRepository = null!;
+    private readonly IUserRepository userRepository = null!;
    
-    public ArticleService(ArticleStore articleStore, UserStore userStore, IArticleRepository articleRepository, UserRepository userRepository, IArticleRepository articleRepo)
+    public ArticleService(ArticleStore articleStore, UserStore userStore, IArticleRepository articleRepository, IUserRepository userRepository, IArticleRepository articleRepo)
     {
         this.articleStore = articleStore;
         this.userStore = userStore;
