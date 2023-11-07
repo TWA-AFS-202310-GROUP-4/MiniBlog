@@ -31,5 +31,10 @@ namespace MiniBlog.Repositories
         {
             return await articleCollection.Find(article => article.Title.Equals(title)).FirstAsync();
         }
+
+        public async Task<Article> FindArticleById(Guid id)
+        {
+            return await articleCollection.Find(article => article.Id.Equals(id)).FirstAsync();
+        }
     }
 }
