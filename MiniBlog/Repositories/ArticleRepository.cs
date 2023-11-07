@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
 using MiniBlog.Model;
+using MiniBlog.Repositories.Interface;
 using MongoDB.Driver;
 
 namespace MiniBlog.Repositories
@@ -25,6 +26,11 @@ namespace MiniBlog.Repositories
         {
             await articleCollection.InsertOneAsync(article);
             return await articleCollection.Find(a => a.Title == article.Title).FirstAsync();
+        }
+
+        public async Task<Article?> GetById(string id)
+        {
+           return await articleCollection.Find(a => a.Id == id).FirstAsync();
         }
     }
 }
