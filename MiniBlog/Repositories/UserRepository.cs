@@ -18,12 +18,12 @@ namespace MiniBlog.Repositories
         public async Task<User> CreateUser(User user)
         {
             await userCollection.InsertOneAsync(user);
-            return await userCollection.Find(userSearch => userSearch.Name == user.Name).FirstAsync();
+            return await userCollection.Find(userSearch => userSearch.Name == user.Name).FirstOrDefaultAsync();
         }
 
         public async Task<User> GetUserByName(string userName)
         {
-            return await userCollection.Find(userSearch => userSearch.Name == userName).FirstAsync();
+            return await userCollection.Find(userSearch => userSearch.Name == userName).FirstOrDefaultAsync();
         }
     }
 }

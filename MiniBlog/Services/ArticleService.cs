@@ -30,6 +30,7 @@ public class ArticleService
                 userRepository.CreateUser(new User(article.UserName));
             }
         }
+        article.Id = String.Empty;
 
         return await this.articleRepository.CreateArticle(article);
     }
