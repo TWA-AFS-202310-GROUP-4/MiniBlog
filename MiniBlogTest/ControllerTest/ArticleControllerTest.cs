@@ -63,10 +63,10 @@ namespace MiniBlogTest.ControllerTest
         {
             var mockArticleRepository = new Mock<IArticleRepository>();
             mockArticleRepository.Setup(repository => repository.CreateArticle(It.IsAny<Article>()))
-                .Returns((Article article) => Task.FromResult(new Article(article.UserName, article.Title, article.Content)));
+                .Returns((Article article) => Task.FromResult<Article>(article));
 
             var mockUserRepository = new Mock<IUserRepository>();
-            mockUserRepository.Setup(repository => repository.IsUserExsit(It.IsAny<string>())).Returns((string name) => Task.FromResult(new List<User>().Exists(user => user.Name == name)));
+            mockUserRepository.Setup(repository => repository.IsUserExsit(It.IsAny<string>())).Returns((string name) => Task.FromResult(false));
 
             mockUserRepository.Setup(repository => repository.GetAllUsersAsync()).Returns(Task.FromResult(new List<User>()));
 
@@ -79,6 +79,7 @@ namespace MiniBlogTest.ControllerTest
             string articleContent = "What a good day today!";
             string articleTitle = "Good day";
             Article article = new Article(userNameWhoWillAdd, articleTitle, articleContent);
+            article.Id = "123";
 
             var createArticleResponse = await client.PostAsJsonAsync("/article", article);
 
@@ -87,7 +88,7 @@ namespace MiniBlogTest.ControllerTest
             mockUserRepository.Verify(repository => repository.IsUserExsit(It.IsAny<string>()), Times.Once);
             mockUserRepository.Verify(repository => repository.CreateUser(It.IsAny<string>()), Times.Once);
 
-            //Assert.Equal(HttpStatusCode.Created, createArticleResponse.StatusCode);
+            Assert.Equal(HttpStatusCode.Created, createArticleResponse.StatusCode);
 
             /*         var articleResponse = await client.GetAsync("/article");
                      var body = await articleResponse.Content.ReadAsStringAsync();

@@ -38,7 +38,6 @@ public class ArticleService
             }
         }
 
-        article.Id = string.Empty;
         return await articleRepository.CreateArticle(article);
     }
 
