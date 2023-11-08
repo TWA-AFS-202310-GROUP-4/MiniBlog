@@ -10,7 +10,9 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
 using MiniBlog;
 using MiniBlog.Model;
+using MiniBlog.Repositories;
 using MiniBlog.Stores;
+using Moq;
 using Newtonsoft.Json;
 using Xunit;
 using Xunit.Sdk;
@@ -114,21 +116,14 @@ namespace MiniBlogTest.ControllerTest
         {
             // given
             var userName = "Tom";
-            var client = GetClient(
-                new ArticleStore(
-                    new List<Article>
-                    {
-                        new Article(userName, string.Empty, string.Empty),
-                        new Article(userName, string.Empty, string.Empty),
-                    }),
-                new UserStore(
-                    new List<User>
-                    {
-                        new User(userName, string.Empty),
-                    }));
-
+            var mock = new Mock<IArticleRepository>();
+            mock.Setup(repository => repository.GetArticles()).Returns(Task.FromResult(new List<Article>
+            {
+                new Article(userName, string.Empty, string.Empty),
+                new Article(userName, string.Empty, string.Empty),
+            }));
+            var client = GetClient(new ArticleStore(), new UserStore(new List<User>() { new User(userName)}), mock.Object);
             var articlesResponse = await client.GetAsync("/article");
-
             articlesResponse.EnsureSuccessStatusCode();
             var articles = JsonConvert.DeserializeObject<List<Article>>(
                 await articlesResponse.Content.ReadAsStringAsync());
@@ -144,7 +139,10 @@ namespace MiniBlogTest.ControllerTest
             await client.DeleteAsync($"/user?name={userName}");
 
             // then
-            var articlesResponseAfterDeletion = await client.GetAsync("/article");
+            var mockAfterDelete = new Mock<IArticleRepository>();
+            mockAfterDelete.Setup(repository => repository.GetArticles()).Returns(Task.FromResult(new List<Article>()));
+            var clientAfterDelete = GetClient(new ArticleStore(), new UserStore(new List<User>() { new User(userName) }), mockAfterDelete.Object);
+            var articlesResponseAfterDeletion = await clientAfterDelete.GetAsync("/article");
             articlesResponseAfterDeletion.EnsureSuccessStatusCode();
             var articlesLeft = JsonConvert.DeserializeObject<List<Article>>(
                 await articlesResponseAfterDeletion.Content.ReadAsStringAsync());

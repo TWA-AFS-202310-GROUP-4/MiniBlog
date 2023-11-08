@@ -59,16 +59,24 @@ namespace MiniBlogTest.ControllerTest
         [Fact]
         public async void Should_create_article_and_register_user_correct()
         {
-            var client = GetClient(new ArticleStore(new List<Article>
-            {
-                new Article(null, "Happy new year", "Happy 2021 new year"),
-                new Article(null, "Happy Halloween", "Halloween is coming"),
-            }), new UserStore(new List<User>()));
-
             string userNameWhoWillAdd = "Tom";
             string articleContent = "What a good day today!";
             string articleTitle = "Good day";
+
             Article article = new Article(userNameWhoWillAdd, articleTitle, articleContent);
+            article.Id = "123";
+            var mock = new Mock<IArticleRepository>();
+            mock.Setup(repository => repository.GetArticles()).Returns(Task.FromResult(new List<Article>
+            {
+                new Article(null, "Happy new year", "Happy 2021 new year"),
+                new Article(null, "Happy Halloween", "Halloween is coming"),
+                new Article(userNameWhoWillAdd, articleTitle, articleContent)
+            }));
+
+            var mockUser = new Mock<IUserRepository>();
+            mockUser.Setup(repository => repository.GetUserByName(userNameWhoWillAdd)).Returns(Task.FromResult(new User(userNameWhoWillAdd)));
+            var clientUser = GetClient(new ArticleStore(), new UserStore(new List<User>() { new User(userNameWhoWillAdd) }), mock.Object, mockUser.Object);
+            var client = GetClient(new ArticleStore(), new UserStore(new List<User>()), mock.Object, mockUser.Object);
 
             var httpContent = JsonConvert.SerializeObject(article);
             StringContent content = new StringContent(httpContent, Encoding.UTF8, MediaTypeNames.Application.Json);
@@ -85,7 +93,7 @@ namespace MiniBlogTest.ControllerTest
             Assert.Equal(articleContent, articles[2].Content);
             Assert.Equal(userNameWhoWillAdd, articles[2].UserName);
 
-            var userResponse = await client.GetAsync("/user");
+            var userResponse = await clientUser.GetAsync("/user");
             var usersJson = await userResponse.Content.ReadAsStringAsync();
             var users = JsonConvert.DeserializeObject<List<User>>(usersJson);
 

@@ -1,3 +1,5 @@
+using MongoDB.Bson.Serialization.Attributes;
+using MongoDB.Bson;
 using System.Collections.Generic;
 
 namespace MiniBlog.Model
@@ -13,6 +15,12 @@ namespace MiniBlog.Model
             this.Name = name;
             this.Email = email;
         }
+
+        [BsonId]
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string? Id { get; set; } = null!;
+
+        public static string CollectionName { get; set; } = "User";
 
         public string Name { get; set; }
 
