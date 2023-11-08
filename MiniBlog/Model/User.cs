@@ -13,7 +13,7 @@ namespace MiniBlog.Model
 
         public User(string name, string email = "anonymous@unknow.com")
         {
-            Id = Guid.NewGuid().ToString();
+            //Id = Guid.NewGuid().ToString();
             this.Name = name;
             this.Email = email;
         }
