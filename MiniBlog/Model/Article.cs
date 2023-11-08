@@ -12,7 +12,7 @@ namespace MiniBlog.Model
 
         public Article(string userName, string title, string content)
         {
-            Id = Guid.NewGuid().ToString();
+            //Id = Guid.NewGuid().ToString();
             UserName = userName;
             Title = title;
             Content = content;

@@ -62,7 +62,9 @@ namespace MiniBlogTest.ControllerTest
             string userNameWhoWillAdd = "Tom";
             string articleContent = "What a good day today!";
             string articleTitle = "Good day";
+
             Article article = new Article(userNameWhoWillAdd, articleTitle, articleContent);
+            article.Id = "123";
             var mock = new Mock<IArticleRepository>();
             mock.Setup(repository => repository.GetArticles()).Returns(Task.FromResult(new List<Article>
             {
